@@ -12,20 +12,32 @@ import uk.ac.imperial.pipe.visitor.component.PetriNetComponentVisitor;
 
 import traffic_sim.TrafficLightTransitionCall;
 
+/**
+ * An external transition wrapping an attached external action which should be called
+ * when the (connected) transition is fired.
+ *
+ * In modular PetriNets for execution cloned instances are called.
+ * This requires the indirect approach to attach an external action to the transition
+ * which can have references and access directly to simulation objects.
+ */
 public class DiscreteExternalActionCallTransition extends DiscreteExternalTransition {
 	
+	// The coupled external action (has to implement the ExternalActionInterface)
 	protected ExternalActionInterface externalAction;
 
+	// A copy constructor is required.
 	public DiscreteExternalActionCallTransition(DiscreteExternalActionCallTransition transition) {
 		super(transition);
 		this.externalAction = transition.externalAction;
 	}
 
 	public DiscreteExternalActionCallTransition(String id, String name, TrafficLightTransitionCall extAct) {
+		// Here the real transition is build as a StartActionExternalTransition.
 		super(id, name, "pipe_project.StartActionExternalTransition");
 		this.externalAction = extAct;
 	}
-	
+
+	// Setting the external action which shall be called when the transition is fired.	
 	public void setExternalAction(ExternalActionInterface extAct) {
 		this.externalAction = extAct;
 	}
@@ -35,7 +47,7 @@ public class DiscreteExternalActionCallTransition extends DiscreteExternalTransi
 	}
 	
 	/**
-     * visits the visitor of it is a {@link uk.ac.imperial.pipe.models.petrinet.DiscreteTransitionVisitor} or a
+     * the visitor is a {@link uk.ac.imperial.pipe.models.petrinet.DiscreteTransitionVisitor} or a
      * {@link uk.ac.imperial.pipe.models.petrinet.TransitionVisitor}.
      * @param visitor
      */

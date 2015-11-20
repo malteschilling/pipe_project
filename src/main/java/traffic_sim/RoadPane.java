@@ -42,7 +42,7 @@ public class RoadPane extends JPanel {
 				g2d.setStroke(new BasicStroke(30, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
                 g2d.draw(new Line2D.Float(start.x, start.y, end.x, end.y) );
                 
-                // Draw vehicles on the lane as blue dots.
+                // Draw vehicles on the lane as blue rectangles.
                 g2d.setPaint(Color.blue);
                 for (Vehicle veh : tempLane.vehiclesOnLane) {
                 	double posPerc = veh.getPositionInLane() / tempLane.getLength();
@@ -51,6 +51,16 @@ public class RoadPane extends JPanel {
 					g2d.fillOval( (x-5), (y-5), 10, 10);
 				}
 			}	
+		}
+		// Draw traffic lights as dots.
+    	for (TrafficLight tl : TrafficLight.trafficLights) {
+    		if (tl.isTrafficLightGreen()) {
+	    		g2d.setPaint(Color.green);
+	    	} else {
+	    		g2d.setPaint(Color.red);
+	    	}
+	    	Point tl_pos = tl.getTrafficLightPosition();
+			g2d.fillOval( tl_pos.x, tl_pos.y, 15, 15);
 		}
 			
 		g2d.dispose();			

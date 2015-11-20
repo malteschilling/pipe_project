@@ -13,8 +13,6 @@ public class View {
     private JLabel label;
     private JButton button;
     
-    //private SimpleHandPane simView;
-    
     public View(String text){
         frame = new JFrame("Traffic Sim");                                    
         frame.getContentPane().setLayout(new BorderLayout());                                          
@@ -26,16 +24,9 @@ public class View {
         
         TrafficGuiController.animationView = trafficView;
         
-        frame.getContentPane().add(trafficView, BorderLayout.CENTER);
-        //label = new JLabel(text);
-        //frame.getContentPane().add(label, BorderLayout.CENTER);
-        
+        frame.getContentPane().add(trafficView, BorderLayout.CENTER);        
         button = new JButton("EXIT");        
         frame.getContentPane().add(button, BorderLayout.SOUTH);
-    }
- 
-	public void setText(String text){
-        label.setText(text);
     }
         
     public JButton getButton(){

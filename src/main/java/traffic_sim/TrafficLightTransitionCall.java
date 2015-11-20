@@ -1,6 +1,5 @@
 package traffic_sim;
 
-import uk.ac.imperial.pipe.models.petrinet.AbstractExternalTransition;
 import pipe_project.ExternalActionInterface;
 
 /**
