@@ -2,6 +2,8 @@ package traffic_sim;
 
 import pipe_project.MainPN;
 
+import java.awt.*;
+
 /**
  * Observes the simulation and marks a connected Place in the PetriNet.
  *
@@ -37,5 +39,10 @@ public class TrafficLightObserver extends TemporalTrafficObject {
 				e.printStackTrace();
 	        }
     	}	
+	}
+
+	@Override
+	public void redraw(Graphics2D g2d) {
+
 	}
 }

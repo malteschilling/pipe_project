@@ -33,24 +33,7 @@ public class RoadPane extends JPanel {
 		Graphics2D g2d = (Graphics2D) g.create();
 		
 		for (TemporalTrafficObject trObj : TemporalTrafficObject.updateList) {
-			if (trObj instanceof Lane) {
-				// Draw the lane
-				g2d.setPaint(Color.gray);
-				Lane tempLane = (Lane) trObj;
-				Point start = tempLane.start_connection.getStartPoint();
-				Point end = tempLane.end_connection.getEndPoint();
-				g2d.setStroke(new BasicStroke(30, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-                g2d.draw(new Line2D.Float(start.x, start.y, end.x, end.y) );
-                
-                // Draw vehicles on the lane as blue rectangles.
-                g2d.setPaint(Color.blue);
-                for (Vehicle veh : tempLane.vehiclesOnLane) {
-                	double posPerc = veh.getPositionInLane() / tempLane.getLength();
-                	int x = ( (int) (start.x * (1-posPerc) + end.x * posPerc ) );
-                	int y = ( (int) (start.y * (1-posPerc) + end.y * posPerc ) );
-					g2d.fillOval( (x-5), (y-5), 10, 10);
-				}
-			}	
+			trObj.redraw(g2d);
 		}
 		// Draw traffic lights as dots.
     	for (TrafficLight tl : TrafficLight.trafficLights) {

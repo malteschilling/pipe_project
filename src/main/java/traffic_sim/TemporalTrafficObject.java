@@ -1,5 +1,6 @@
 package traffic_sim;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -35,5 +36,7 @@ public abstract class TemporalTrafficObject {
 		}
 		TrafficGuiController.animationView.repaint();
 	}
+
+	public abstract void redraw(Graphics2D g2d);
     
 }
