@@ -8,14 +8,11 @@ import uk.ac.imperial.pipe.runner.RealTimePetriNetRunner;
 import uk.ac.imperial.pipe.dsl.APetriNet;
 import uk.ac.imperial.pipe.dsl.APlace;
 import uk.ac.imperial.pipe.dsl.AToken;
-import uk.ac.imperial.pipe.exceptions.IncludeException;
 import uk.ac.imperial.pipe.exceptions.PetriNetComponentException;
 import uk.ac.imperial.pipe.models.petrinet.*;
 
-import pn_visualization.*;
 import traffic_sim.*;
 
-import javax.swing.JFrame;
 import java.awt.Color;
 import javax.swing.SwingUtilities;
 
@@ -74,9 +71,10 @@ public class MainPN {
         prod.setStartPoint(100, 100);
         // on right hand: vehicles disappear in this VehicleConsumer
         VehicleConsumer cons = new VehicleConsumer();
-        cons.setEndPoint(510, 100);
+        cons.setEndPoint(500, 500);
         // Traffic light in the middle (shown at end of first lane)
-        TrafficLight tl = new TrafficLight();
+		Building building = new Building(500, 100, "testPoint");
+		TrafficLight tl = new TrafficLight();
         // again, points have to be defined for the visualization in order to define where
         // the lane should be drawn
         tl.setStartPoint(310, 100);
@@ -85,9 +83,10 @@ public class MainPN {
         tl.setTrafficLightPosition( 290, 120);
         // The lanes connecting the different producers-consumers
         Lane lane_east = new Lane("VorAmpel", prod, tl);
-        Lane lane_east_2 = new Lane("NachAmpel", tl, cons);
+        Lane lane_east_2 = new Lane("NachAmpel", tl, building);
+		Lane nachBuilding = new Lane("NachBuilding", building, cons);
 
-        // An object observing the simulator state (is pulled each simulation update)
+		// An object observing the simulator state (is pulled each simulation update)
         // and can change the marking in the Petri Network (in the target place)
         TrafficLightObserver tlWaiting = new TrafficLightObserver( tl );
         tlWaiting.setActionPNTargetPlace( "WAITING" );
