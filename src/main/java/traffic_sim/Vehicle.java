@@ -46,7 +46,11 @@ public class Vehicle {
 	 * Direction the car is driving in in degrees [-180,180]
 	 */
 	private double current_direction;
-
+	/**
+	 * Preceding vehicle on same lane.
+	 */
+	private Vehicle preceding_vehicle =  null;
+	
 	//TODO Distance to preceding car
 	//TODO Number of preceding cars on lanes
 
@@ -117,7 +121,11 @@ public class Vehicle {
 	 */
 	public double getCurrentVelocity() {
 		//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
+		if (getDistanceToPrecedingVehicle() < Lane.min_car_distance) {
+			decelerate(getVelocityOfPreviousVehicle());
+		}
 		return this.current_velocity;
+		
 	}
 
 	/**
@@ -128,8 +136,10 @@ public class Vehicle {
 	 */
 	public void accelerate(double timedelta) {
 		//TODO Only accelerate if the distance to the car in front is 2*min_distance
-		current_velocity += timedelta * ACCEL;
-		current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
+		if (getDistanceToPrecedingVehicle() >= 2*Lane.min_car_distance) {
+			current_velocity += timedelta * ACCEL;
+			current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
+		}
 	}
 
 	/**
@@ -188,6 +198,68 @@ public class Vehicle {
 
 	public void setDestination(Point destination) {
 		this.destination = destination;
+	}
+	
+
+	/**
+	 * Return the number of vehicles in front of this vehicle on the same lane.
+	 */
+	public int getNumberOfVehicles() {
+		int i = 0;
+		for (Vehicle veh: this.current_lane.vehiclesOnLane) {
+			if (veh.equals(this)) {
+				return i;
+			}
+			i++;
+		}
+		return 0;
+	}
+	
+	/**
+	 * Return the number of vehicles on the entire lane.
+	 * 
+	 * @param otherLane Another Lane than the current one.
+	 */
+	public int getNumberOfVehicles(Lane otherLane) {
+		return otherLane.vehiclesOnLane.size();
+	}
+	
+	/**
+	 * Update preceding vehicle.
+	 */
+	private void updatePrecedingVehicle() {
+		Vehicle curVeh = null;
+		for (Vehicle veh: this.current_lane.vehiclesOnLane) {
+			if (veh.equals(this)) {
+				this.preceding_vehicle = curVeh;
+				break;
+			}
+			curVeh = veh;
+		}
+	}
+	
+	/**
+	 * Return velocity of the preceding vehicle. If there is no vehicle 
+	 * it will return the distance to the end of the lane.
+	 */
+	public double getDistanceToPrecedingVehicle() {
+		updatePrecedingVehicle();
+		if (this.preceding_vehicle != null) {
+			return Math.abs(this.preceding_vehicle.position - this.position);
+		}
+		return this.current_lane.getDistanceToEnd(this.position);
+	}
+	
+	/**
+	 * Return velocity of the preceding vehicle. If there is no vehicle 
+	 * it will return its own velocity.
+	 */
+	public double getVelocityOfPreviousVehicle() {
+		updatePrecedingVehicle();
+		if (this.preceding_vehicle != null) {		
+			return this.preceding_vehicle.getCurrentVelocity();
+		}
+		return this.current_velocity;
 	}
 
 	/**
