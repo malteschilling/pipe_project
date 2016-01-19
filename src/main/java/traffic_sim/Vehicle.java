@@ -46,9 +46,13 @@ public class Vehicle {
 	 * Direction the car is driving in in degrees [-180,180]
 	 */
 	private double current_direction;
+	/**
+	 * Minimal distance to preceding car
+	 */
+	private final double MIN_DIST;
 
-	//TODO Distance to preceding car
-	//TODO Number of preceding cars on lanes
+	//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
+	//TODO Only accelerate if the distance to the car in front is 2*min_distance
 
 	/*
 	 * Constructor - a vehicle always requires a lane.
@@ -63,6 +67,7 @@ public class Vehicle {
 		this.current_velocity = 40.;
 		this.ACCEL = 7;
 		this.MAX_VELOCITY = 40;
+		this.MIN_DIST = MAX_VELOCITY;
 	}
 
 	/*
@@ -116,7 +121,6 @@ public class Vehicle {
 	 * Return the current target velocity of the vehicle. If car ahaed is too close reduce velocity.
 	 */
 	public double getCurrentVelocity() {
-		//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
 		return this.current_velocity;
 	}
 
@@ -127,7 +131,6 @@ public class Vehicle {
 	 * @param timedelta Elapsed time since last acceleration call
 	 */
 	public void accelerate(double timedelta) {
-		//TODO Only accelerate if the distance to the car in front is 2*min_distance
 		current_velocity += timedelta * ACCEL;
 		current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
 	}
@@ -219,5 +222,19 @@ public class Vehicle {
 			}
 		}
 		return bestLane;
+	}
+
+	/**
+	 * Returns the distance to the car in front
+	 * @return Distance to car in front or 4*<code>MIN_DIST</code>
+	 */
+	public double getFrontVehicleDistance() {
+		Vehicle inFront = current_lane.getVehicleInFront(this);
+		if (inFront != null) {
+			return Math.abs(inFront.getPositionInLane() - this.getPositionInLane());
+		}
+		else {
+			return 4*MIN_DIST;
+		}
 	}
 }
