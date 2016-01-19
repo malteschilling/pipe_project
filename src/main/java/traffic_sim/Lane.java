@@ -165,4 +165,38 @@ public class Lane extends TemporalTrafficObject {
         this.length = length;
     }
 
+	/**
+     * Returns the vehicle in front of the given one, null if there is none.
+     * @param vehicle The vehicle
+     * @return The vehicle in front of the given vehicle or null if there is none in front
+     */
+    public Vehicle getVehicleInFront(Vehicle vehicle) {
+        Vehicle inFront = null;
+        for (Vehicle v : vehiclesOnLane) {
+            if (v.equals(vehicle)) {
+                break;
+            }
+            else {
+                inFront = v;
+            }
+        }
+        return inFront;
+    }
+
+	/**
+     * Returns the number of vehicles in front of the given one.
+     * @param vehicle The vehicle
+     * @return Number of vehicles in front of the given one
+     */
+    public int getVehicleNumberInFront(Vehicle vehicle) {
+        int inFront = 0;
+        for (Vehicle v : vehiclesOnLane) {
+            if (v.equals(vehicle)) {
+                break;
+            } else {
+                inFront++;
+            }
+        }
+        return inFront;
+    }
 }
