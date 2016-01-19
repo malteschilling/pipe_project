@@ -40,9 +40,4 @@ public class TrafficLightObserver extends TemporalTrafficObject {
 	        }
     	}	
 	}
-
-	@Override
-	public void redraw(Graphics2D g2d) {
-
-	}
 }

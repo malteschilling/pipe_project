@@ -35,11 +35,6 @@ public class VehicleProducer extends TemporalTrafficObject implements VehiclePro
 		time += duration;
 	}
 
-	@Override
-	public void redraw(Graphics2D g2d) {
-
-	}
-
 	public void setLaneStarting(Lane lane) {
 		this.lane_starts = lane;
 	}

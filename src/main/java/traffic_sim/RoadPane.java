@@ -3,6 +3,10 @@ package traffic_sim;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.PriorityQueue;
+import java.util.TreeSet;
 import javax.swing.JPanel;
 
 /**
@@ -11,11 +15,13 @@ import javax.swing.JPanel;
  * Simple visualization of the traffic scene.
  */
 public class RoadPane extends JPanel {
+	private Collection<Drawable> drawables;
 	
 	/**
 	 * Construct a visualization.
      */
 	public RoadPane() {
+		drawables = new PriorityQueue<>(new DrawableComparator());
 	}
 	
 	@Override
@@ -31,22 +37,19 @@ public class RoadPane extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g.create();
-		
-		for (TemporalTrafficObject trObj : TemporalTrafficObject.updateList) {
-			trObj.redraw(g2d);
+		for (Drawable drawable : drawables) {
+			drawable.redraw(g2d);
 		}
-		// Draw traffic lights as dots.
-    	for (TrafficLight tl : TrafficLight.trafficLights) {
-    		if (tl.isTrafficLightGreen()) {
-	    		g2d.setPaint(Color.green);
-	    	} else {
-	    		g2d.setPaint(Color.red);
-	    	}
-	    	Point tl_pos = tl.getTrafficLightPosition();
-			g2d.fillOval( tl_pos.x, tl_pos.y, 15, 15);
-		}
-			
+
 		g2d.dispose();			
+	}
+
+	public void addDrawable(Drawable d){
+		this.drawables.add(d);
+	}
+
+	public void addAllDrawables(Drawable... drawables){
+		Collections.addAll(this.drawables, drawables);
 	}
 
 }

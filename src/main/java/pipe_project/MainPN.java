@@ -14,7 +14,6 @@ import uk.ac.imperial.pipe.models.petrinet.*;
 import traffic_sim.*;
 
 import java.awt.Color;
-import javax.swing.SwingUtilities;
 
 /**
  * Running and constructing a petri network for the traffic simulation:
@@ -55,15 +54,7 @@ public class MainPN {
     public static void main( String[] args )
     {
      	// 1. Construct main window showing traffic situation (and exit button)   
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {                                           
-                View view = new View("-"); 
-                TrafficGuiController controller = new TrafficGuiController(view);
-                controller.control();
-            }
-        });  
-        
+		final TrafficController controller = new TrafficController();
         // 2. Construct traffic simulation scene
 		// for example: on the left side a VehicleProducer sets vehicles onto the first lane
         VehicleProducer prod = new VehicleProducer();
@@ -85,6 +76,8 @@ public class MainPN {
         Lane lane_east = new Lane("VorAmpel", prod, tl);
         Lane lane_east_2 = new Lane("NachAmpel", tl, building);
 		Lane nachBuilding = new Lane("NachBuilding", building, cons);
+
+		controller.getView().getTrafficView().addAllDrawables(lane_east,lane_east_2,nachBuilding,tl,building);
 
 		// An object observing the simulator state (is pulled each simulation update)
         // and can change the marking in the Petri Network (in the target place)
@@ -119,16 +112,7 @@ public class MainPN {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setSize(640, 480);
 			frame.setVisible(true);*/
-				
-			while (true) {
-				// Stepping the Petri Net every second (this should be tuned to a lower value 
-				// when your system is running).
-				// and for the rest of the time the thread sleeps.
-	            runner.stepPetriNetSynchronized(1000);
-	            // And calling an update on the traffic simulation.
-	            TemporalTrafficObject.updateAll( 1. );
-	        }
-
+			controller.control(runner);
     	} catch (Exception e) {
 	    		e.printStackTrace();
     	}
