@@ -1,6 +1,6 @@
 package traffic_sim;
 
-import java.awt.Point;
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * The traffic light regulates when vehicles are allowed to be consumed from
  * that lane and are put on the lane which starts at the traffic light.
  */
-public class TrafficLight implements VehicleProducerInterface, VehicleConsumerInterface  {
+public class TrafficLight implements VehicleProducerInterface, VehicleConsumerInterface,Drawable   {
 
     protected Lane lane_ends, lane_starts;
 	// The current state of the traffic light - right now only green (true) or 
@@ -24,7 +24,6 @@ public class TrafficLight implements VehicleProducerInterface, VehicleConsumerIn
 	private Point start_point, end_point, graphic_pos;
     
     public TrafficLight() {
-    	super();
     	trafficLights.add(this);
     }
     
@@ -115,5 +114,21 @@ public class TrafficLight implements VehicleProducerInterface, VehicleConsumerIn
 	
 	public void setTrafficLightPosition(int x, int y) {
 		this.graphic_pos = new Point(x, y);
-	}    
+	}
+
+	@Override
+	public void redraw(Graphics2D g2d) {
+		if (this.isTrafficLightGreen()) {
+			g2d.setPaint(Color.green);
+		} else {
+			g2d.setPaint(Color.red);
+		}
+		Point tl_pos = this.graphic_pos;
+		g2d.fillOval( tl_pos.x, tl_pos.y, 15, 15);
+	}
+
+	@Override
+	public Integer priority() {
+		return 2;
+	}
 }

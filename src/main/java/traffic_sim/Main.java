@@ -9,15 +9,8 @@ public class Main
 {
     public static void main(String[] args) {          
     	// Open the view on the sim 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {                                           
-                View view = new View("-"); 
-                TrafficGuiController controller = new TrafficGuiController(view);
-                controller.control();
-            }
-        });  
-        
+        TrafficController controller = new TrafficController();
+
         // Construct a simple traffic situation
         VehicleProducer prod = new VehicleProducer();
         prod.setStartPoint(100, 100);

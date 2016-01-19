@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * A Lane is a TemporalTrafficObject - it is therefore called with the simulation
  * update cycle. In the update step, vehicles are moved along.
  */
-public class Lane extends TemporalTrafficObject {
+public class Lane extends TemporalTrafficObject implements Drawable {
 
     private String name;
     // Minimum distance between cars
@@ -101,6 +101,11 @@ public class Lane extends TemporalTrafficObject {
             int y = ((int) (start.y * (1 - posPerc) + end.y * posPerc));
             g2d.fillOval((x - 5), (y - 5), 10, 10);
         }
+    }
+
+    @Override
+    public Integer priority() {
+        return 1;
     }
 
     /**

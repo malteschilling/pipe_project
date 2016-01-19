@@ -34,9 +34,6 @@ public abstract class TemporalTrafficObject {
 		for (TemporalTrafficObject updObj : updateList) {
 			updObj.updateStep(duration);
 		}
-		TrafficGuiController.animationView.repaint();
 	}
-
-	public abstract void redraw(Graphics2D g2d);
     
 }
