@@ -277,6 +277,11 @@ public class Vehicle {
 		if (possible_decisions.isEmpty()) {
 			return null;
 		}
+		for (Lane lane : possible_decisions.keySet()) {
+			if (lane.end_connection.equals(destination_consumer)) {
+				return lane;
+			}
+		}
 		Point dest_delta = new Point(destination.x - global_position.x, destination.y - global_position.y);
 		double dest_global_angle = Math.atan2(dest_delta.y, dest_delta.x);
 		double dest_rel_angle = current_direction - dest_global_angle;
@@ -308,7 +313,7 @@ public class Vehicle {
 			return Math.abs(inFront.getPositionInLane() - this.getPositionInLane());
 		}
 		else {
-			return 4*MIN_DIST;
+			return this.current_lane.getDistanceToEnd(this.position);
 		}
 	}
 }
