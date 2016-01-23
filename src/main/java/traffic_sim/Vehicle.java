@@ -1,11 +1,12 @@
 package traffic_sim;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Vehicles are moving around in the traffic sim.
- * <p/>
+ * <p>
  * There could be more distinct types (cars, bikes  ...).
  * A vehicle is always related to a current lane and the position
  * is one dimensional with respect to that lane.
@@ -25,11 +26,11 @@ public class Vehicle {
 	/**
 	 * Destination the car would like to reach. Should be as close as possible to the real destination.
 	 */
-	private Point destination;
+	private Destination current_destination;
 	/**
-	 * Consumer which is the car's destination.
+	 * All other destinations the vehicle should reach.
 	 */
-	private VehicleConsumer destination_consumer;
+	private List<Destination> destinations;
 	/**
 	 * Car's acceleration.
 	 */
@@ -47,13 +48,9 @@ public class Vehicle {
 	 */
 	private double current_direction;
 	/**
-	 * Minimal distance to preceding car
-	 */
-	private final double MIN_DIST;
-	/**
 	 * Preceding vehicle on same lane.
 	 */
-	private Vehicle preceding_vehicle =  null;
+	private Vehicle preceding_vehicle = null;
 
 	//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
 	//TODO Only accelerate if the distance to the car in front is 2*min_distance
@@ -71,7 +68,6 @@ public class Vehicle {
 		this.current_velocity = 40.;
 		this.ACCEL = 7;
 		this.MAX_VELOCITY = 40;
-		this.MIN_DIST = MAX_VELOCITY;
 	}
 
 	/*
@@ -114,11 +110,13 @@ public class Vehicle {
 		this.current_lane = lane;
 	}
 
-	/*
-	 * Set a new current target velocity.
-	 */
-	public void setCurrentVelocity(double velocity) {
-		this.current_velocity = velocity;
+	public void addDestination(Destination dest) {
+		if (current_destination == null || (current_destination.getRemaining_wait_sec() == 0 && destinations.isEmpty())) {
+			current_destination = dest;
+		}
+		else {
+			destinations.add(dest);
+		}
 	}
 
 	/*
@@ -126,8 +124,9 @@ public class Vehicle {
 	 */
 	public double getCurrentVelocity() {
 		//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
-		if (getDistanceToPrecedingVehicle() < Lane.min_car_distance) {
-			decelerate(getVelocityOfPreviousVehicle());
+		Vehicle in_front = current_lane.getVehicleInFront(this);
+		if (in_front != null && in_front.getPositionInLane() - position < Lane.min_car_distance) {
+			decelerate(in_front.getCurrentVelocity());
 		}
 		return this.current_velocity;
 
@@ -141,7 +140,8 @@ public class Vehicle {
 	 */
 	public void accelerate(double timedelta) {
 		//TODO Only accelerate if the distance to the car in front is 2*min_distance
-		if (getDistanceToPrecedingVehicle() >= 2*Lane.min_car_distance) {
+		Vehicle in_front = current_lane.getVehicleInFront(this);
+		if (in_front.getPositionInLane() - position >= 2 * Lane.min_car_distance) {
 			current_velocity += timedelta * ACCEL;
 			current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
 		}
@@ -189,82 +189,8 @@ public class Vehicle {
 		current_direction = direction;
 	}
 
-	public VehicleConsumer getDestination_consumer() {
-		return destination_consumer;
-	}
-
-	public void setDestination_consumer(VehicleConsumer destination_consumer) {
-		this.destination_consumer = destination_consumer;
-	}
-
-	public Point getDestination() {
-		return destination;
-	}
-
-	public void setDestination(Point destination) {
-		this.destination = destination;
-	}
-
-
-	/**
-	 * Return the number of vehicles in front of this vehicle on the same lane.
-	 */
-	public int getNumberOfVehicles() {
-		int i = 0;
-		for (Vehicle veh: this.current_lane.vehiclesOnLane) {
-			if (veh.equals(this)) {
-				return i;
-			}
-			i++;
-		}
-		return 0;
-	}
-
-	/**
-	 * Return the number of vehicles on the entire lane.
-	 *
-	 * @param otherLane Another Lane than the current one.
-	 */
-	public int getNumberOfVehicles(Lane otherLane) {
-		return otherLane.vehiclesOnLane.size();
-	}
-
-	/**
-	 * Update preceding vehicle.
-	 */
-	private void updatePrecedingVehicle() {
-		Vehicle curVeh = null;
-		for (Vehicle veh: this.current_lane.vehiclesOnLane) {
-			if (veh.equals(this)) {
-				this.preceding_vehicle = curVeh;
-				break;
-			}
-			curVeh = veh;
-		}
-	}
-
-	/**
-	 * Return velocity of the preceding vehicle. If there is no vehicle
-	 * it will return the distance to the end of the lane.
-	 */
-	public double getDistanceToPrecedingVehicle() {
-		updatePrecedingVehicle();
-		if (this.preceding_vehicle != null) {
-			return Math.abs(this.preceding_vehicle.position - this.position);
-		}
-		return this.current_lane.getDistanceToEnd(this.position);
-	}
-
-	/**
-	 * Return velocity of the preceding vehicle. If there is no vehicle
-	 * it will return its own velocity.
-	 */
-	public double getVelocityOfPreviousVehicle() {
-		updatePrecedingVehicle();
-		if (this.preceding_vehicle != null) {
-			return this.preceding_vehicle.getCurrentVelocity();
-		}
-		return this.current_velocity;
+	public Destination getDestination() {
+		return current_destination;
 	}
 
 	/**
@@ -278,11 +204,12 @@ public class Vehicle {
 			return null;
 		}
 		for (Lane lane : possible_decisions.keySet()) {
-			if (lane.end_connection.equals(destination_consumer)) {
+			if (lane.end_connection.equals(current_destination.getConsumer())) {
 				return lane;
 			}
 		}
-		Point dest_delta = new Point(destination.x - global_position.x, destination.y - global_position.y);
+		Point dest_delta = new Point(current_destination.getPosition().x - global_position.x,
+									 current_destination.getPosition().y - global_position.y);
 		double dest_global_angle = Math.atan2(dest_delta.y, dest_delta.x);
 		double dest_rel_angle = current_direction - dest_global_angle;
 		//If angle is greater than 180 it is shorter to turn the other way around
@@ -305,15 +232,31 @@ public class Vehicle {
 
 	/**
 	 * Returns the distance to the car in front
+	 *
 	 * @return Distance to car in front or 4*<code>MIN_DIST</code>
 	 */
 	public double getFrontVehicleDistance() {
 		Vehicle inFront = current_lane.getVehicleInFront(this);
 		if (inFront != null) {
 			return Math.abs(inFront.getPositionInLane() - this.getPositionInLane());
-		}
-		else {
+		} else {
 			return this.current_lane.getDistanceToEnd(this.position);
 		}
+	}
+
+	public void update(double elapsed_secs) {
+		//Destination update
+		if (current_destination != null) {
+			current_destination.updateWait(elapsed_secs);
+			if (current_destination.getRemaining_wait_sec() == 0) {
+				if (!destinations.isEmpty()) {
+					current_destination = destinations.remove(0);
+				} else {
+					//TODO What to do after the last destination is finished
+				}
+			}
+		}
+
+		//TODO Other actions like accelerating, decelerating, etc.
 	}
 }
