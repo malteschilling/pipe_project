@@ -1,6 +1,7 @@
 package traffic_sim;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,7 @@ public class Vehicle {
 		this.current_velocity = 40.;
 		this.ACCEL = 7;
 		this.MAX_VELOCITY = 40;
+		destinations = new ArrayList<>();
 	}
 
 	/*
