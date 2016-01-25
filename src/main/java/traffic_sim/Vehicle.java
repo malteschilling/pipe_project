@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Vehicles are moving around in the traffic sim.
@@ -53,6 +54,11 @@ public class Vehicle {
 	 */
 	private Vehicle preceding_vehicle = null;
 
+	/**
+	 * Random number generator.
+	 */
+	private static Random randomOracle = new Random();
+
 	/*
 	 * Constructor - a vehicle always requires a lane.
 	 */
@@ -100,6 +106,25 @@ public class Vehicle {
 		current_lane.removeVehicleFromLane(this);
 		newLane.addVehicleToLane(this);
 		this.position = 0;
+	}
+
+	/*
+	 * Remove a vehicle from one lane and put it onto one of the given lanes.
+	 *
+	 */
+	public void switchToLane(List<Lane> lanes) {
+		Lane choice = chooseNextLane(lanes);
+		this.switchToLane(choice);
+	}
+
+	/*
+	 * Choose the next lane the vehicle enters.
+	 * Currently this is done randomly.
+	 */
+	private Lane chooseNextLane(List<Lane> lanes) {
+		int numberOfLanes = lanes.size();
+		int chosenLane = randomOracle.nextInt(numberOfLanes);
+		return lanes.get(chosenLane);
 	}
 
 	/*
