@@ -17,44 +17,45 @@ import java.awt.Color;
 
 /**
  * Running and constructing a petri network for the traffic simulation:
- * 
+ *
  * Starts the simplistic traffic simulation and a petri net that controls a traffic
- * light. The main purpose of this program is to learn how to integrate external 
+ * light. The main purpose of this program is to learn how to integrate external
  * inputs, how to synchronize petri nets and an internal simulation and
  * how to cause actions in the external program.
  *
- * The initial program is minimalistic and provides a simple solution to those 
+ * The initial program is minimalistic and provides a simple solution to those
  * questions, but only in a more complex scenario the advantage of such an approach
  * can become apparent.
  * Right now:
- * when there are 3 or more cars in front of the traffic light 
+ * when there are 3 or more cars in front of the traffic light
  * (this is tested in the TrafficLightObserver) the PetriNet place for WAITING is marked
- *  which causes the following transition to fire. This external transition is linked 
+ *  which causes the following transition to fire. This external transition is linked
  * to an external action which switches the traffic light.
  *
- * The TASK: 
+ * The TASK:
  * - extend the simple traffic simulation to a complete crossing (two streets crossing
  *   each other with traffic on both streets in both direction)
  * - introduce meaningful predicates in the simulation which you pull in order
  *   to drive/influence the petri net (maybe also use timed transitions)
  * - You can (and should) change the simulation behavior at least in one setting:
- *   e.g. introduce different (probably random) rates with which vehicles are set onto the 
+ *   e.g. introduce different (probably random) rates with which vehicles are set onto the
  *   different lanes and those might change over time. As a consequence, you might want
  *   to introduce new predicates pulled from the simulation (when a car is arriving ...).
  * - Construct a Petri network to control the traffic lights.
  *   You should work it out for one crossing and then duplicate those.
  *   It might be helpful to look up the include hierarchies which allow for modular nets.
  * And of course you are allowed to extend the traffic situation further, e.g. introduce
- * a pedestrian crossing ... 
+ * a pedestrian crossing ...
  */
 public class MainPN {
-	
+
 	public static RealTimePetriNetRunner runner;
-	
+
     public static void main( String[] args )
     {
-     	// 1. Construct main window showing traffic situation (and exit button)   
+     	// 1. Construct main window showing traffic situation (and exit button)
 		final TrafficController controller = new TrafficController();
+
         // 2. Construct traffic simulation scene
 		// for example: on the left side a VehicleProducer sets vehicles onto the first lane
         VehicleProducer prod = new VehicleProducer();
@@ -79,16 +80,73 @@ public class MainPN {
 
 		controller.getView().getTrafficView().addAllDrawables(lane_east,lane_east_2,nachBuilding,tl,building);
 
+		// 2.1 - Lane extension before traffic light
+		VehicleProducer start = new VehicleProducer();
+		start.setStartPoint(600, 200);
+
+		LaneExtension extension = new LaneExtension(800, 200);
+
+		VehicleConsumer destination1 = new VehicleConsumer();
+		destination1.setEndPoint(1000, 50);
+		VehicleConsumer destination2 = new VehicleConsumer();
+		destination2.setEndPoint(1150, 200);
+		VehicleConsumer destination3 = new VehicleConsumer();
+		destination3.setEndPoint(1000, 400);
+
+
+//		TrafficLight turnLeftTrafficLight = new TrafficLight();
+//		turnLeftTrafficLight.setStartPoint(1000, 150);
+//		turnLeftTrafficLight.setEndPoint(1010, 100);
+//		turnLeftTrafficLight.setTrafficLightPosition(1000, 170);
+//
+//		TrafficLightObserver turnLeftObserver = new TrafficLightObserver(
+//				turnLeftTrafficLight);
+//		turnLeftObserver.setActionPNTargetPlace("WAITING");
+//
+//		TrafficLight goStraightTrafficLight = new TrafficLight();
+//		goStraightTrafficLight.setStartPoint(1000, 200);
+//		goStraightTrafficLight.setEndPoint(1010, 200);
+//		goStraightTrafficLight.setTrafficLightPosition(1000, 220);
+//
+//		TrafficLightObserver goStraightObserver = new TrafficLightObserver(
+//				goStraightTrafficLight);
+//		goStraightObserver .setActionPNTargetPlace("WAITING");
+//
+//
+//		TrafficLight turnRightTrafficLight = new TrafficLight();
+//		turnRightTrafficLight.setStartPoint(1000, 250);
+//		turnRightTrafficLight.setEndPoint(1010, 250);
+//		turnRightTrafficLight.setTrafficLightPosition(1000, 270);
+//
+//		TrafficLightObserver turnRightObserver = new TrafficLightObserver(
+//				turnRightTrafficLight);
+//		turnRightObserver.setActionPNTargetPlace("WAITING");
+
+
+		Lane incomingLane = new Lane("BeforeExtension", start, extension);
+
+		Lane turnLeftLane = new Lane("TurnLeftLane", extension, destination1);
+		Lane goStraightLane = new Lane("GoStraightLane", extension, destination2);
+		Lane turnRightLane = new Lane("TurnRightLane", extension, destination3);
+
+//		Lane turnLeftLane = new Lane("TurnLeftLane", extension, turnLeftTrafficLight);
+//		Lane goStraightLane = new Lane("GoStraightLane", extension, goStraightTrafficLight);
+//		Lane turnRightLane = new Lane("TurnRightLane", extension, turnRightTrafficLight);
+//		Lane afterLeftTurnLane= new Lane("TurnedLeft", turnLeftTrafficLight, destination1);
+//		Lane afterStraightLane= new Lane("WentStraight", goStraightTrafficLight, destination2);
+//		Lane afterRightTurnLane= new Lane("TurnedRight", turnRightTrafficLight, destination3);
+
+
 		// An object observing the simulator state (is pulled each simulation update)
         // and can change the marking in the Petri Network (in the target place)
         TrafficLightObserver tlWaiting = new TrafficLightObserver( tl );
         tlWaiting.setActionPNTargetPlace( "WAITING" );
-        
+
         try {
         	// 3. Build the simple Petri network controlling traffic:
-        	// when there are 3 or more cars in front of the traffic light 
+        	// when there are 3 or more cars in front of the traffic light
         	// (this is tested in the TrafficLightObserver above)
-        	// the PetriNet place for WAITING is marked which causes 
+        	// the PetriNet place for WAITING is marked which causes
         	// the following transition to fire.
         	// This external transition is linked to an external action which switches
         	// the traffic light (this seems overly complicated in this trivial scenario
@@ -99,14 +157,14 @@ public class MainPN {
 	    	for (Place singlePlaceObj : placesPN) {
 	    		System.out.println("Places: " + singlePlaceObj.getId() + " = " + singlePlaceObj.getNumberOfTokensStored() );
    			}
-	    	
+
 	    	// Start running of the PN
     		runner = new RealTimePetriNetRunner( currentPN );
 			FiringGenericActionListener firedTrans = new FiringGenericActionListener();
 			runner.addPropertyChangeListener(firedTrans);
-			
+
 			runner.startRealTimeClock();
-			
+
 			// Visualization of the PN
 			/*VisualizationPetriNetFrame frame = new VisualizationPetriNetFrame( currentPN );
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -121,7 +179,7 @@ public class MainPN {
 
     /**
      * Build test Petri network for traffic light.
-     */     
+     */
 	private static PetriNet buildNet(TrafficLight tl) throws PetriNetComponentException {
 		// Create a Petri Net.
 		PetriNet petriNet = APetriNet.with(AToken.called("Default").withColor(Color.BLACK)).and(APlace.withId("WAITING").externallyAccessible()).andFinally(
@@ -136,7 +194,7 @@ public class MainPN {
 	    		endPlace = singlePlaceObj;
 	    	}
    		}
-		
+
 		// Here is an ExternalAction coupled to a transition.
 		// First, the externalAction object is created.
 		// The invokeExternalAction will be called when the transition is fired
@@ -146,10 +204,10 @@ public class MainPN {
 		// of transition, but have to have a construct of DiscreteExternalActionCallTransition
 		// (which I have built) and the external action objects which you
 		// can customize (see TrafficLightTransitionCall as an example).
-    	TrafficLightTransitionCall extAct = new TrafficLightTransitionCall( tl );    	
+    	TrafficLightTransitionCall extAct = new TrafficLightTransitionCall( tl );
     	DiscreteExternalActionCallTransition newTransition = new DiscreteExternalActionCallTransition( "SwitchToGreen", "SwitchToGreen", extAct );
     	petriNet.addTransition(newTransition);
-		
+
 		// Connecting the network.
 		Map<String, String> weights = new HashMap<>();
 		weights.put("Default", "1");
@@ -157,7 +215,7 @@ public class MainPN {
 		weights2.put("Default", "1");
     	petriNet.addArc( new InboundNormalArc( startPlace, newTransition, weights ) );
     	petriNet.addArc( new OutboundNormalArc( newTransition, endPlace, weights2 ) );
-    
+
 		return petriNet;
 	}
 
