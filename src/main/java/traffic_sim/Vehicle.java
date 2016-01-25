@@ -53,9 +53,6 @@ public class Vehicle {
 	 */
 	private Vehicle preceding_vehicle = null;
 
-	//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
-	//TODO Only accelerate if the distance to the car in front is 2*min_distance
-
 	/*
 	 * Constructor - a vehicle always requires a lane.
 	 */
@@ -113,10 +110,10 @@ public class Vehicle {
 	}
 
 	public void addDestination(Destination dest) {
-		if (current_destination == null || (current_destination.getRemaining_wait_sec() == 0 && destinations.isEmpty())) {
+		if (current_destination == null ||
+			(current_destination.getRemaining_wait_sec() == 0 && destinations.isEmpty())) {
 			current_destination = dest;
-		}
-		else {
+		} else {
 			destinations.add(dest);
 		}
 	}
@@ -125,13 +122,11 @@ public class Vehicle {
 	 * Return the current target velocity of the vehicle. If car ahaed is too close reduce velocity.
 	 */
 	public double getCurrentVelocity() {
-		//TODO If distance to the car ahead is smaller than min_distance decelerate to preceding car's velocity.
 		Vehicle in_front = current_lane.getVehicleInFront(this);
-		if (in_front != null && in_front.getPositionInLane() - position < Lane.min_car_distance) {
+		if (in_front != null && getFrontVehicleDistance(in_front) < 1.5 * Lane.min_car_distance) {
 			decelerate(in_front.getCurrentVelocity());
 		}
 		return this.current_velocity;
-
 	}
 
 	/**
@@ -141,9 +136,9 @@ public class Vehicle {
 	 * @param timedelta Elapsed time since last acceleration call
 	 */
 	public void accelerate(double timedelta) {
-		//TODO Only accelerate if the distance to the car in front is 2*min_distance
 		Vehicle in_front = current_lane.getVehicleInFront(this);
-		if (in_front.getPositionInLane() - position >= 2 * Lane.min_car_distance) {
+		if ((in_front == null && current_lane.getDistanceToEnd(position) > 0) ||
+			(in_front != null && getFrontVehicleDistance(in_front) >= 2 * Lane.min_car_distance)) {
 			current_velocity += timedelta * ACCEL;
 			current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
 		}
@@ -155,7 +150,11 @@ public class Vehicle {
 	 * @param goal_velocity Velocity to decelerate to
 	 */
 	public void decelerate(double goal_velocity) {
-		current_velocity = goal_velocity < current_velocity ? goal_velocity : current_velocity;
+		if (goal_velocity < 0) {
+			stop();
+		} else {
+			current_velocity = goal_velocity < current_velocity ? goal_velocity : current_velocity;
+		}
 	}
 
 	/**
@@ -235,12 +234,11 @@ public class Vehicle {
 	/**
 	 * Returns the distance to the car in front
 	 *
-	 * @return Distance to car in front or 4*<code>MIN_DIST</code>
+	 * @return Distance to car in front or distance to end of lane
 	 */
-	public double getFrontVehicleDistance() {
-		Vehicle inFront = current_lane.getVehicleInFront(this);
-		if (inFront != null) {
-			return Math.abs(inFront.getPositionInLane() - this.getPositionInLane());
+	public double getFrontVehicleDistance(Vehicle in_front) {
+		if (in_front != null) {
+			return Math.abs(in_front.getPositionInLane() - this.getPositionInLane());
 		} else {
 			return this.current_lane.getDistanceToEnd(this.position);
 		}
@@ -260,5 +258,27 @@ public class Vehicle {
 		}
 
 		//TODO Other actions like accelerating, decelerating, etc.
+		//Try to accelerate all the time
+		accelerate(elapsed_secs);
+		Vehicle in_front = current_lane.getVehicleInFront(this);
+		double driven_delta = getCurrentVelocity() * elapsed_secs;
+		//If vehicle gets to close to preceding vehicle, decelerate and hold some distance
+		if (in_front != null && driven_delta > getFrontVehicleDistance(in_front) - current_lane.min_car_distance) {
+			decelerate(in_front.getCurrentVelocity());
+			driven_delta = getFrontVehicleDistance(in_front) - current_lane.min_car_distance;
+		}
+		double new_pos = position + driven_delta;
+		if (new_pos >= current_lane.getLength()) {
+			if (!current_lane.end_connection.tryToConsumeVehicle(this)) {
+				stop();
+				new_pos = current_lane.getLength();
+				setPositionInLane(new_pos);
+			}
+		} else {
+			setPositionInLane(new_pos);
+			current_lane.free_until = new_pos - Lane.min_car_distance;
+		}
+
+		//TODO Update global position and direction
 	}
 }

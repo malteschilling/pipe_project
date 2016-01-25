@@ -80,7 +80,8 @@ public class Lane extends TemporalTrafficObject implements Drawable {
         // calculate how far a car is allowed to move.
         free_until = length;
         for (Vehicle vehicleUpdate : vehiclesOnLane) {
-            tryToMoveVehicle(vehicleUpdate, duration);
+            //tryToMoveVehicle(vehicleUpdate, duration); //<-Uncomment this line to get old behaviour
+            vehicleUpdate.update(duration); //<- Comment this out to get old behaviour
         }
     }
 
