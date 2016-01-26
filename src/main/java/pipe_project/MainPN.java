@@ -82,103 +82,161 @@ public class MainPN {
 
 
 		// 2.1 - Lane extension before traffic light
-		VehicleProducer westStart = new VehicleProducer();
-		westStart.setStartPoint(600, 200);
 
-		LaneExtension extension = new LaneExtension(700, 200);
+		// All lanes starting in the west
+		VehicleProducer westStart = new VehicleProducer();
+		westStart.setStartPoint(600, 300);
+
+		LaneExtension extension = new LaneExtension(700, 300);
 
 		VehicleConsumer destination1 = new VehicleConsumer();
-		destination1.setEndPoint(800, 20);
+		destination1.setEndPoint(800, 120);
 		VehicleConsumer destination2 = new VehicleConsumer();
-		destination2.setEndPoint(1000, 200);
+		destination2.setEndPoint(1000, 300);
 		VehicleConsumer destination3 = new VehicleConsumer();
-		destination3.setEndPoint(800, 450);
+		destination3.setEndPoint(800, 550);
 
 		Lane westIncomingLane = new Lane("BeforeExtension", westStart, extension);
 
 		// Starting in the west, turning left
-		TrafficLight westLeftTL = new TrafficLight();
-		westLeftTL.setStartPoint(800, 150);
-		westLeftTL.setEndPoint(800, 150);
-		westLeftTL.setTrafficLightPosition(775, 165);
+		TrafficLight westTurnNorthTL = new TrafficLight();
+		westTurnNorthTL.setStartPoint(800, 250);
+		westTurnNorthTL.setEndPoint(800, 250);
+		westTurnNorthTL.setTrafficLightPosition(775, 265);
 
-		LaneExtension westTurnLeftExtension = new LaneExtension(750, 150);
-		Lane westTurnLeftLane1 = new Lane("TurnLeftLane1", extension, westTurnLeftExtension);
-		Lane westTurnLeftLane2 = new Lane("TurnLeftLane2", westTurnLeftExtension, westLeftTL);
-		Lane westTurnLeftLane3 = new Lane("TurnLeftLane3", westLeftTL, destination1);
+		LaneExtension westTurnNorthExtension = new LaneExtension(750, 250);
+		Lane westTurnNorthLane1 = new Lane("TurnNorthLane1", extension, westTurnNorthExtension);
+		Lane westTurnNorthLane2 = new Lane("TurnNorthLane2", westTurnNorthExtension, westTurnNorthTL);
+		Lane westTurnNorthLane3 = new Lane("TurnNorthLane3", westTurnNorthTL, destination1);
 
 		// Starting in the west, going straight
 		TrafficLight westStraightTL = new TrafficLight();
-		westStraightTL.setStartPoint(800, 200);
-		westStraightTL.setEndPoint(800, 200);
-		westStraightTL.setTrafficLightPosition(775, 215);
+		westStraightTL.setStartPoint(800, 300);
+		westStraightTL.setEndPoint(800, 300);
+		westStraightTL.setTrafficLightPosition(775, 315);
 
 		Lane westStraightBeforeTL = new Lane("GoStraightLane", extension, westStraightTL);
 		Lane westStraightAfterTL = new Lane("GoStraightLane", westStraightTL, destination2);
 
-		// Starting in the west, turning left
-		TrafficLight westRightTL = new TrafficLight();
-		westRightTL.setStartPoint(800, 250);
-		westRightTL.setEndPoint(800, 250);
-		westRightTL.setTrafficLightPosition(775, 265);
+		// Starting in the west, turning south
+		TrafficLight westTurnSouthTL = new TrafficLight();
+		westTurnSouthTL.setStartPoint(800, 350);
+		westTurnSouthTL.setEndPoint(800, 350);
+		westTurnSouthTL.setTrafficLightPosition(775, 365);
 
-		LaneExtension westTurnRightExtension = new LaneExtension(750, 250);
-		Lane westTurnRightLane1 = new Lane("TurnRightLane1", extension, westTurnRightExtension);
-		Lane westTurnRightLane2 = new Lane("TurnRightLane2", westTurnRightExtension, westRightTL);
-		Lane westTurnRightLane3 = new Lane("TurnRightLane3", westRightTL, destination3);
-
-
-//		TrafficLight turnLeftTrafficLight = new TrafficLight();
-//		turnLeftTrafficLight.setStartPoint(1000, 150);
-//		turnLeftTrafficLight.setEndPoint(1010, 100);
-//		turnLeftTrafficLight.setTrafficLightPosition(1000, 170);
-//
-//		TrafficLightObserver turnLeftObserver = new TrafficLightObserver(
-//				turnLeftTrafficLight);
-//		turnLeftObserver.setActionPNTargetPlace("WAITING");
-//
-//		TrafficLight goStraightTrafficLight = new TrafficLight();
-//		goStraightTrafficLight.setStartPoint(1000, 200);
-//		goStraightTrafficLight.setEndPoint(1010, 200);
-//		goStraightTrafficLight.setTrafficLightPosition(1000, 220);
-//
-//		TrafficLightObserver goStraightObserver = new TrafficLightObserver(
-//				goStraightTrafficLight);
-//		goStraightObserver .setActionPNTargetPlace("WAITING");
-//
-//
-//		TrafficLight turnRightTrafficLight = new TrafficLight();
-//		turnRightTrafficLight.setStartPoint(1000, 250);
-//		turnRightTrafficLight.setEndPoint(1010, 250);
-//		turnRightTrafficLight.setTrafficLightPosition(1000, 270);
-//
-//		TrafficLightObserver turnRightObserver = new TrafficLightObserver(
-//				turnRightTrafficLight);
-//		turnRightObserver.setActionPNTargetPlace("WAITING");
+		LaneExtension westTurnSouthExtension = new LaneExtension(750, 350);
+		Lane westTurnSouthLane1 = new Lane("TurnSouthLane1", extension, westTurnSouthExtension);
+		Lane westTurnSouthLane2 = new Lane("TurnSouthLane2", westTurnSouthExtension, westTurnSouthTL);
+		Lane westTurnSouthLane3 = new Lane("TurnSouthLane3", westTurnSouthTL, destination3);
 
 
-//		Lane turnLeftLane = new Lane("TurnLeftLane", extension, turnLeftTrafficLight);
-//		Lane goStraightLane = new Lane("GoStraightLane", extension, goStraightTrafficLight);
-//		Lane turnRightLane = new Lane("TurnRightLane", extension, turnRightTrafficLight);
-//		Lane afterLeftTurnLane= new Lane("TurnedLeft", turnLeftTrafficLight, destination1);
-//		Lane afterStraightLane= new Lane("WentStraight", goStraightTrafficLight, destination2);
-//		Lane afterRightTurnLane= new Lane("TurnedRight", turnRightTrafficLight, destination3);
+		// All lanes starting in the EAST
+		VehicleProducer eastStart = new VehicleProducer();
+		eastStart.setStartPoint(1100, 200);
+		LaneExtension eastExtension = new LaneExtension(1000, 200);
 
+		VehicleConsumer eastDestination1 = new VehicleConsumer();
+		eastDestination1.setEndPoint(900, 20);
+		VehicleConsumer eastDestination2 = new VehicleConsumer();
+		eastDestination2.setEndPoint(600, 200);
+		VehicleConsumer eastDestination3 = new VehicleConsumer();
+		eastDestination3.setEndPoint(900, 450);
+
+		Lane eastIncomingLane = new Lane("EastIncoming",
+				eastStart, eastExtension);
+
+		// Starting in the east, turning north
+		TrafficLight eastTurnNorthTL = new TrafficLight();
+		eastTurnNorthTL.setStartPoint(900, 150);
+		eastTurnNorthTL.setEndPoint(900, 150);
+		eastTurnNorthTL.setTrafficLightPosition(875, 165);
+
+		LaneExtension eastTurnNorthExtension = new LaneExtension(950, 150);
+		Lane eastTurnNorthLane1 = new Lane("EastTurnNorthLane1",
+				eastExtension, eastTurnNorthExtension);
+		Lane eastTurnNorthLane2 = new Lane("EastTurnNorthLane2",
+				eastTurnNorthExtension, eastTurnNorthTL);
+		Lane eastTurnNorthLane3 = new Lane("EastTurnNorthLane3",
+				eastTurnNorthTL, eastDestination1);
+
+		// Starting in the east, going straight
+		TrafficLight eastStraightTL = new TrafficLight();
+		eastStraightTL.setStartPoint(900, 200);
+		eastStraightTL.setEndPoint(900, 200);
+		eastStraightTL.setTrafficLightPosition(875, 215);
+
+		Lane eastStraightBeforeTL = new Lane("EastGoStraightLane",
+				eastExtension, eastStraightTL);
+		Lane eastStraightAfterTL = new Lane("EastGoStraightLane",
+				eastStraightTL, eastDestination2);
+
+		// Starting in the east, turning south
+		TrafficLight eastTurnSouthTL = new TrafficLight();
+		eastTurnSouthTL.setStartPoint(900, 250);
+		eastTurnSouthTL.setEndPoint(900, 250);
+		eastTurnSouthTL.setTrafficLightPosition(875, 265);
+
+		LaneExtension eastTurnSouthExtension = new LaneExtension(950, 250);
+		Lane eastTurnSouthLane1 = new Lane("EastTurnSouthLane1",
+				eastExtension, eastTurnSouthExtension);
+		Lane eastTurnSouthLane2 = new Lane("EastTurnSouthLane2",
+				eastTurnSouthExtension, eastTurnSouthTL);
+		Lane eastTurnSouthLane3 = new Lane("EastTurnSouthLane3",
+				eastTurnSouthTL, eastDestination3);
+
+
+		// Starting in the North
+		VehicleProducer northStart = new VehicleProducer();
+		northStart.setStartPoint(850, 50);
+		LaneExtension northExtension = new LaneExtension(850, 200);
+
+//		VehicleConsumer northDestination1 = new VehicleConsumer();
+//		northDestination1.setEndPoint(900, 20);
+		VehicleConsumer northDestination2 = new VehicleConsumer();
+		northDestination2.setEndPoint(850, 500);
+//		VehicleConsumer northDestination3 = new VehicleConsumer();
+//		northDestination3.setEndPoint(900, 450);
+
+		Lane northIncomingLane = new Lane("NorthIncoming",
+				northStart, northExtension);
+
+		Lane northToSouthLane = new Lane("NorthToSouthLane",
+				northExtension, northDestination2);
+
+
+
+		// Starting in the South
+
+
+
+
+
+
+		// Controller
 		controller.getView().getTrafficView().addAllDrawables(
 			// Lanes starting in the west
 			westIncomingLane,
-			westTurnLeftLane1, westTurnLeftLane2, westTurnLeftLane3,
+			westTurnNorthLane1, westTurnNorthLane2, westTurnNorthLane3,
 			westStraightBeforeTL, westStraightAfterTL,
-			westTurnRightLane1, westTurnRightLane2, westTurnRightLane3,
-			westLeftTL, westStraightTL, westRightTL);
+			westTurnSouthLane1, westTurnSouthLane2, westTurnSouthLane3,
+			westTurnNorthTL, westStraightTL, westTurnSouthTL,
 
+			// Lanes starting in the east
+			eastIncomingLane,
+			eastTurnNorthLane1, eastTurnNorthLane2, eastTurnNorthLane3,
+			eastStraightBeforeTL, eastStraightAfterTL,
+			eastTurnSouthLane1, eastTurnSouthLane2, eastTurnSouthLane3,
+			eastTurnNorthTL, eastStraightTL, eastTurnSouthTL,
+
+			// Starting in the north
+			northIncomingLane, northToSouthLane
+				);
+
+
+		// West-East Traffic Lights
 		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
-				westLeftTL);
-		westLeftTLOberserver.setActionPNTargetPlace( "WAITING" );
-		//		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
-//				westLeftTL);
-//		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
-//				westLeftTL);
+				westTurnNorthTL);
+		westLeftTLOberserver.setActionPNTargetPlace("WAITING");
 
 
 		// An object observing the simulator state (is pulled each simulation update)
