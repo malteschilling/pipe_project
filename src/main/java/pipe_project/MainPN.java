@@ -80,18 +80,52 @@ public class MainPN {
 
 		controller.getView().getTrafficView().addAllDrawables(lane_east,lane_east_2,nachBuilding,tl,building);
 
-		// 2.1 - Lane extension before traffic light
-		VehicleProducer start = new VehicleProducer();
-		start.setStartPoint(600, 200);
 
-		LaneExtension extension = new LaneExtension(800, 200);
+		// 2.1 - Lane extension before traffic light
+		VehicleProducer westStart = new VehicleProducer();
+		westStart.setStartPoint(600, 200);
+
+		LaneExtension extension = new LaneExtension(700, 200);
 
 		VehicleConsumer destination1 = new VehicleConsumer();
-		destination1.setEndPoint(1000, 50);
+		destination1.setEndPoint(800, 20);
 		VehicleConsumer destination2 = new VehicleConsumer();
-		destination2.setEndPoint(1150, 200);
+		destination2.setEndPoint(1000, 200);
 		VehicleConsumer destination3 = new VehicleConsumer();
-		destination3.setEndPoint(1000, 400);
+		destination3.setEndPoint(800, 450);
+
+		Lane westIncomingLane = new Lane("BeforeExtension", westStart, extension);
+
+		// Starting in the west, turning left
+		TrafficLight westLeftTL = new TrafficLight();
+		westLeftTL.setStartPoint(800, 150);
+		westLeftTL.setEndPoint(800, 150);
+		westLeftTL.setTrafficLightPosition(775, 165);
+
+		LaneExtension westTurnLeftExtension = new LaneExtension(750, 150);
+		Lane westTurnLeftLane1 = new Lane("TurnLeftLane1", extension, westTurnLeftExtension);
+		Lane westTurnLeftLane2 = new Lane("TurnLeftLane2", westTurnLeftExtension, westLeftTL);
+		Lane westTurnLeftLane3 = new Lane("TurnLeftLane3", westLeftTL, destination1);
+
+		// Starting in the west, going straight
+		TrafficLight westStraightTL = new TrafficLight();
+		westStraightTL.setStartPoint(800, 200);
+		westStraightTL.setEndPoint(800, 200);
+		westStraightTL.setTrafficLightPosition(775, 215);
+
+		Lane westStraightBeforeTL = new Lane("GoStraightLane", extension, westStraightTL);
+		Lane westStraightAfterTL = new Lane("GoStraightLane", westStraightTL, destination2);
+
+		// Starting in the west, turning left
+		TrafficLight westRightTL = new TrafficLight();
+		westRightTL.setStartPoint(800, 250);
+		westRightTL.setEndPoint(800, 250);
+		westRightTL.setTrafficLightPosition(775, 265);
+
+		LaneExtension westTurnRightExtension = new LaneExtension(750, 250);
+		Lane westTurnRightLane1 = new Lane("TurnRightLane1", extension, westTurnRightExtension);
+		Lane westTurnRightLane2 = new Lane("TurnRightLane2", westTurnRightExtension, westRightTL);
+		Lane westTurnRightLane3 = new Lane("TurnRightLane3", westRightTL, destination3);
 
 
 //		TrafficLight turnLeftTrafficLight = new TrafficLight();
@@ -123,18 +157,28 @@ public class MainPN {
 //		turnRightObserver.setActionPNTargetPlace("WAITING");
 
 
-		Lane incomingLane = new Lane("BeforeExtension", start, extension);
-
-		Lane turnLeftLane = new Lane("TurnLeftLane", extension, destination1);
-		Lane goStraightLane = new Lane("GoStraightLane", extension, destination2);
-		Lane turnRightLane = new Lane("TurnRightLane", extension, destination3);
-
 //		Lane turnLeftLane = new Lane("TurnLeftLane", extension, turnLeftTrafficLight);
 //		Lane goStraightLane = new Lane("GoStraightLane", extension, goStraightTrafficLight);
 //		Lane turnRightLane = new Lane("TurnRightLane", extension, turnRightTrafficLight);
 //		Lane afterLeftTurnLane= new Lane("TurnedLeft", turnLeftTrafficLight, destination1);
 //		Lane afterStraightLane= new Lane("WentStraight", goStraightTrafficLight, destination2);
 //		Lane afterRightTurnLane= new Lane("TurnedRight", turnRightTrafficLight, destination3);
+
+		controller.getView().getTrafficView().addAllDrawables(
+			// Lanes starting in the west
+			westIncomingLane,
+			westTurnLeftLane1, westTurnLeftLane2, westTurnLeftLane3,
+			westStraightBeforeTL, westStraightAfterTL,
+			westTurnRightLane1, westTurnRightLane2, westTurnRightLane3,
+			westLeftTL, westStraightTL, westRightTL);
+
+		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
+				westLeftTL);
+		westLeftTLOberserver.setActionPNTargetPlace( "WAITING" );
+		//		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
+//				westLeftTL);
+//		TrafficLightObserver westLeftTLOberserver = new TrafficLightObserver (
+//				westLeftTL);
 
 
 		// An object observing the simulator state (is pulled each simulation update)
