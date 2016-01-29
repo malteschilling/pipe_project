@@ -247,7 +247,9 @@ public class Vehicle {
 	public void update(double elapsed_secs) {
 		//Destination update
 		if (current_destination != null) {
-			current_destination.updateWait(elapsed_secs);
+			if (current_destination.isAt_destination()) {
+				current_destination.updateWait(elapsed_secs);
+			}
 			if (current_destination.getRemaining_wait_sec() == 0) {
 				if (!destinations.isEmpty()) {
 					current_destination = destinations.remove(0);
