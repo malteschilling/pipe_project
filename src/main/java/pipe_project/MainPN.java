@@ -56,8 +56,7 @@ public class MainPN {
 		final TrafficController controller = new TrafficController();
 
     	// 2. Construct traffic simulation scene
-		TrafficLight tl = createTwoLaneIntersection(controller);
-
+		TrafficLight tl = createEasyIntersection(controller, 100, 100);
 
 		// An object observing the simulator state (is pulled each simulation update)
         // and can change the marking in the Petri Network (in the target place)
@@ -98,6 +97,94 @@ public class MainPN {
 	    		e.printStackTrace();
     	}
 
+    }
+
+
+    private static TrafficLight createEasyIntersection(
+    		TrafficController controller, int xCoordinate, int yCoordinate) {
+
+    	// Lane from east to west
+    	VehicleProducer eastStart = new VehicleProducer(800, 100);
+    	VehicleConsumer westDestination = new VehicleConsumer(100, 100);
+    	Lane eastWestLane = new Lane("EastToWestLane",
+    			eastStart, westDestination);
+
+    	// Lane form west to east and south
+    	VehicleProducer westStart = new VehicleProducer(100, 200);
+    	VehicleConsumer eastDestination1 = new VehicleConsumer(800, 200);
+    	VehicleConsumer southDestination = new VehicleConsumer(400, 500);
+    	LaneExtension westLaneSplit = new LaneExtension(200, 200);
+    	LaneExtension westLaneExtension = new LaneExtension(240, 240);
+    	LaneExtension westToSouthTurn = new LaneExtension(400, 240);
+
+    	TrafficLight westTrafficLight = new TrafficLight();
+    	westTrafficLight.setEndPoint(440, 200);
+    	westTrafficLight.setStartPoint(480, 200);
+    	westTrafficLight.setTrafficLightPosition(420, 220);
+
+    	// Incoming lane (until it splits)
+    	Lane westIncomingLane = new Lane("WestIncoming",
+    			westStart, westLaneSplit);
+    	// Lane continuing to the east
+    	Lane westTrafficLightLane = new Lane("WestTrafficLightLane",
+    			westLaneSplit, westTrafficLight);
+    	Lane eastDestinationLane1 = new Lane("EastDestinationLane1",
+    			westTrafficLight, eastDestination1);
+    	// Lane turning to the south
+    	Lane westToSouthTurnLane1 = new Lane("WestToSouthTurnLane",
+    			westLaneSplit, westLaneExtension);
+    	Lane westToSouthTurnLane2 = new Lane("WestToSouthTurnLane2",
+    			westLaneExtension, westToSouthTurn);
+    	Lane southDestinationLane = new Lane("SouthDestinationLane",
+    			westToSouthTurn, southDestination);
+
+
+    	// Lanes from south to west and east
+    	VehicleProducer southStart = new VehicleProducer(460, 500);
+    	VehicleConsumer westDestination2 = new VehicleConsumer(100, 140);
+    	VehicleConsumer eastDestination2 = new VehicleConsumer(800, 240);
+
+    	LaneExtension southToWestTurn = new LaneExtension(460, 140);
+    	LaneExtension southLaneSplit = new LaneExtension (460, 400);
+    	LaneExtension southLaneExtension = new LaneExtension(500, 360);
+    	LaneExtension southToEastTurn = new LaneExtension(500, 240);
+
+    	TrafficLight southTrafficLight = new TrafficLight();
+    	southTrafficLight.setEndPoint(460, 220);
+    	southTrafficLight.setStartPoint(460, 180);
+    	southTrafficLight.setTrafficLightPosition(480, 220);
+
+    	// Incoming lane (until it splits)
+    	Lane southIncomingLane = new Lane("SouthIncoming",
+    			southStart, southLaneSplit);
+    	// Lane turning to the west
+    	Lane southTrafficLightLane = new Lane("SouthTrafficLightLane",
+    			southLaneSplit, southTrafficLight);
+    	Lane southWestTurnLane = new Lane("SouthToWestTurnLane",
+    			southTrafficLight, southToWestTurn);
+    	Lane westDestinationLane2 = new Lane("WestDestinationLane2",
+    			southToWestTurn, westDestination2);
+    	// Lane turning to the east
+    	Lane southToEastTurnLane1 = new Lane("SouthToEastTurnLane1",
+    			southLaneSplit, southLaneExtension);
+    	Lane southToEastTurnLane2 = new Lane("SouthToEastTurnLane2",
+    			southLaneExtension, southToEastTurn);
+    	Lane eastDestinationLane2 = new Lane("EastDestinationLane2",
+    			southToEastTurn, eastDestination2);
+
+
+    	// Add all drawables (lanes and traffic lights) to the view controller
+    	controller.getView().getTrafficView().addAllDrawables(
+			eastWestLane,
+			westIncomingLane, westTrafficLightLane, eastDestinationLane1,
+			westToSouthTurnLane1, westToSouthTurnLane2, southDestinationLane,
+			westTrafficLight,
+			southIncomingLane, southTrafficLightLane, southWestTurnLane,
+			westDestinationLane2, southToEastTurnLane1, eastDestinationLane2,
+			southToEastTurnLane2,
+			southTrafficLight);
+
+    	return westTrafficLight;
     }
 
 
