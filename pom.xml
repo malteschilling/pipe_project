@@ -11,7 +11,7 @@
     <groupId>de.cit-ec</groupId>
     <artifactId>pipe_project</artifactId>
     <version>0.1-SNAPSHOT</version>
-    
+
     <packaging>jar</packaging>
     <name>pipe_project</name>
 
@@ -22,8 +22,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 			<plugin>
@@ -47,7 +47,7 @@
             <scope>system</scope>
             <systemPath>${basedir}/jars/pipe-core-1.1.0-SNAPSHOT-jar-with-dependencies.jar</systemPath>
         </dependency>
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
