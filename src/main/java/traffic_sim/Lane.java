@@ -205,4 +205,8 @@ public class Lane extends TemporalTrafficObject implements Drawable {
         }
         return inFront;
     }
+    
+    public ConcurrentLinkedQueue<Vehicle> getVehiclesOnLane() {
+    	return vehiclesOnLane;
+    }
 }
