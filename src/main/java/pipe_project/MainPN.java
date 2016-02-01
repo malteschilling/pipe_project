@@ -14,6 +14,7 @@ import uk.ac.imperial.pipe.models.petrinet.*;
 import traffic_sim.*;
 
 import java.awt.Color;
+import java.util.SimpleTimeZone;
 
 /**
  * Running and constructing a petri network for the traffic simulation:
@@ -49,6 +50,10 @@ import java.awt.Color;
  */
 public class MainPN {
 
+	private static final int TIME_GREEN = 2000;
+	private static final int TIME_YELLOW = 500;
+	private static final int TIME_START_PHASE = 1000;
+	private static final int TIME_YELLOW_RED = 500;
 	public static RealTimePetriNetRunner runner;
 
     public static void main(String[] args) {
@@ -56,14 +61,9 @@ public class MainPN {
 		final TrafficController controller = new TrafficController();
 
     	// 2. Construct traffic simulation scene
-		TrafficLight tl = createEasyIntersection(controller, 100, 100);
-
-		// An object observing the simulator state (is pulled each simulation update)
-        // and can change the marking in the Petri Network (in the target place)
-        TrafficLightObserver tlWaiting = new TrafficLightObserver(tl);
-        tlWaiting.setActionPNTargetPlace("WAITING");
 
         try {
+			PetriNet currentPN = createEasyIntersection(controller, 100, 100);
         	// 3. Build the simple Petri network controlling traffic:
         	// when there are 3 or more cars in front of the traffic light
         	// (this is tested in the TrafficLightObserver above)
@@ -73,7 +73,6 @@ public class MainPN {
         	// the traffic light (this seems overly complicated in this trivial scenario
         	// but becomes important when one has to deal with many concurrent ongoing
         	// and possibly temporal processes depending on the petri net).
-        	PetriNet currentPN = buildNet(tl);
         	Collection<Place> placesPN = (currentPN).getPlaces();
 	    	for (Place singlePlaceObj : placesPN) {
 	    		System.out.println("Places: " + singlePlaceObj.getId() + " = "
@@ -100,8 +99,8 @@ public class MainPN {
     }
 
 
-    private static TrafficLight createEasyIntersection(
-    		TrafficController controller, int xCoordinate, int yCoordinate) {
+    private static PetriNet createEasyIntersection(
+    		TrafficController controller, int xCoordinate, int yCoordinate) throws PetriNetComponentException {
 
     	// Lane from east to west
     	VehicleProducer eastStart = new VehicleProducer(800, 100);
@@ -172,6 +171,10 @@ public class MainPN {
     	Lane eastDestinationLane2 = new Lane("EastDestinationLane2",
     			southToEastTurn, eastDestination2);
 
+		// An object observing the simulator state (is pulled each simulation update)
+		// and can change the marking in the Petri Network (in the target place)
+		//new TrafficLightObserver(westTrafficLight).setActionPNTargetPlace("WAITING");
+		//new TrafficLightObserver(southTrafficLight).setActionPNTargetPlace("WAITING");
 
     	// Add all drawables (lanes and traffic lights) to the view controller
     	controller.getView().getTrafficView().addAllDrawables(
@@ -184,7 +187,7 @@ public class MainPN {
 			southToEastTurnLane2,
 			southTrafficLight);
 
-    	return westTrafficLight;
+    	return buildNet(southTrafficLight,westTrafficLight);
     }
 
 
@@ -453,47 +456,109 @@ public class MainPN {
     /**
      * Build test Petri network for traffic light.
      */
-	private static PetriNet buildNet(TrafficLight tl) throws PetriNetComponentException {
+	private static PetriNet buildNet(TrafficLight southTrafficLight,TrafficLight westTrafficLight) throws PetriNetComponentException {
 		// Create a Petri Net.
-		PetriNet petriNet = APetriNet.with(AToken.called("Default").
-				withColor(Color.BLACK)).
-				and(APlace.withId("WAITING").externallyAccessible()).
-				andFinally(APlace.withId("GREEN"));
-    	Collection<Place> placesPN = petriNet.getPlaces();
-    	Place startPlace = null;
-    	Place endPlace = null;
-	    for (Place singlePlaceObj : placesPN) {
-	    	if ( singlePlaceObj.getId().equals("WAITING") ) {
-	    		startPlace = singlePlaceObj;
-	    	} else {
-	    		endPlace = singlePlaceObj;
-	    	}
-   		}
+		PetriNet net = new PetriNet();
+		net.addToken(new ColoredToken("Default",Color.BLACK));
+		HashMap<String,String> weights = new HashMap<>();
+		weights.put("Default","1");
+		DiscreteExternalActionCallTransition turnPhaseWest = new DiscreteExternalActionCallTransition("turnPhaseWest", "turnPhaseWest",() -> {
+			westTrafficLight.setTrafficLightGreen(Color.YELLOW);
+		});
+		turnPhaseWest.setTimed(true);
+		turnPhaseWest.setDelay(TIME_START_PHASE);
+		net.addTransition(turnPhaseWest);
+		DiscreteExternalActionCallTransition turnPhaseSouth = new DiscreteExternalActionCallTransition("turnPhaseSouth", "turnPhaseSouth",() -> {
+			southTrafficLight.setTrafficLightGreen(Color.YELLOW);
+		});
+		turnPhaseSouth.setTimed(true);
+		turnPhaseSouth.setDelay(TIME_START_PHASE);
+		net.addTransition(turnPhaseSouth);
+		DiscretePlace isPhaseWest = new DiscretePlace("isPhaseWest", "isPhaseWest");
+		DiscretePlace isPhaseSouth = new DiscretePlace("isPhaseSouth", "isPhaseSouth");
+		net.addPlace(isPhaseWest);
+		net.addPlace(isPhaseSouth);
+		isPhaseSouth.incrementTokenCount("Default");
+		net.addArc(new InboundNormalArc(isPhaseWest,turnPhaseWest,weights));
+		net.addArc(new InboundNormalArc(isPhaseSouth,turnPhaseSouth,weights));
 
-		// Here is an ExternalAction coupled to a transition.
-		// First, the externalAction object is created.
-		// The invokeExternalAction will be called when the transition is fired
-		// (internally this is a little bit complicated as a given PN structure
-		// gets copied for each instantiation of a new petri net runner (which advances
-		// the state of a PN) and therefore we can not simply derive our own type
-		// of transition, but have to have a construct of DiscreteExternalActionCallTransition
-		// (which I have built) and the external action objects which you
-		// can customize (see TrafficLightTransitionCall as an example).
-    	TrafficLightTransitionCall extAct = new TrafficLightTransitionCall( tl );
-    	DiscreteExternalActionCallTransition newTransition =
-    			new DiscreteExternalActionCallTransition(
-    					"SwitchToGreen", "SwitchToGreen", extAct );
-    	petriNet.addTransition(newTransition);
+		//south Trafficlight
+		TrafficLight light =  southTrafficLight;
+		Place isGreen = new DiscretePlace("Green"+light);
+		Place isYellow = new DiscretePlace("Yellow"+light);
+		Place isRed = new DiscretePlace("Red"+light);
+		net.addPlace(isGreen);
+		net.addPlace(isYellow);
+		net.addPlace(isRed);
+		isRed.incrementTokenCount("Default");
+		DiscreteExternalActionCallTransition turnRed = new DiscreteExternalActionCallTransition("turnRed" + light, "turnRed" + light, () -> {
+			light.setTrafficLightGreen(Color.RED);
+		});
+		turnRed.setTimed(true);
+		turnRed.setDelay(TIME_YELLOW);
+		net.addTransition(turnRed);
+		DiscreteExternalActionCallTransition turnYellow = new DiscreteExternalActionCallTransition("turnYellow" + light, "turnYellow" + light, () -> {
+			light.setTrafficLightGreen(Color.YELLOW);
+		});
+		turnYellow.setTimed(true);
+		turnYellow.setDelay(TIME_GREEN);
+		net.addTransition(turnYellow);
+		DiscreteExternalActionCallTransition turnGreen = new DiscreteExternalActionCallTransition("turnGreen" + light, "turnGreen" + light, () -> {
+			light.setTrafficLightGreen(Color.GREEN);
+		});
+		turnGreen.setTimed(true);
+		turnGreen.setDelay(TIME_YELLOW_RED);
+		net.addTransition(turnGreen);
+		net.addArc(new InboundNormalArc(isGreen,turnYellow,weights));
+		net.addArc(new OutboundNormalArc(turnYellow,isYellow,weights));
+		net.addArc(new InboundNormalArc(isYellow,turnRed,weights));
+		net.addArc(new OutboundNormalArc(turnRed,isRed,weights));
+		net.addArc(new InboundNormalArc(isRed,turnGreen,weights));
+		net.addArc(new InboundNormalArc(isYellow,turnGreen,weights));
+		net.addArc(new OutboundNormalArc(turnGreen,isGreen,weights));
+		net.addArc(new OutboundNormalArc(turnPhaseSouth,isYellow,weights));
+		net.addArc(new OutboundNormalArc(turnRed,isPhaseWest,weights));
+		net.addArc(new InboundInhibitorArc(isRed,turnRed));
 
-		// Connecting the network.
-		Map<String, String> weights = new HashMap<>();
-		weights.put("Default", "1");
-		Map<String, String> weights2 = new HashMap<>();
-		weights2.put("Default", "1");
-    	petriNet.addArc( new InboundNormalArc( startPlace, newTransition, weights ) );
-    	petriNet.addArc( new OutboundNormalArc( newTransition, endPlace, weights2 ) );
+		//south Trafficlight
+		TrafficLight light2 =  westTrafficLight;
+		isGreen = new DiscretePlace("Green"+light2);
+		isYellow = new DiscretePlace("Yellow"+light2);
+		isRed = new DiscretePlace("Red"+light2);
+		net.addPlace(isGreen);
+		net.addPlace(isYellow);
+		net.addPlace(isRed);
+		isRed.incrementTokenCount("Default");
+		turnRed = new DiscreteExternalActionCallTransition("turnRed" + light2, "turnRed" + light2, () -> {
+			light2.setTrafficLightGreen(Color.RED);
+		});
+		turnRed.setTimed(true);
+		turnRed.setDelay(TIME_YELLOW);
+		net.addTransition(turnRed);
+		turnYellow = new DiscreteExternalActionCallTransition("turnYellow" + light2, "turnYellow" + light2, () -> {
+			light2.setTrafficLightGreen(Color.YELLOW);
+		});
+		turnYellow.setTimed(true);
+		turnYellow.setDelay(TIME_GREEN);
+		net.addTransition(turnYellow);
+		turnGreen = new DiscreteExternalActionCallTransition("turnGreen" + light2, "turnGreen" + light2, () -> {
+			light2.setTrafficLightGreen(Color.GREEN);
+		});
+		turnGreen.setTimed(true);
+		turnGreen.setDelay(TIME_YELLOW_RED);
+		net.addTransition(turnGreen);
+		net.addArc(new InboundNormalArc(isGreen,turnYellow,weights));
+		net.addArc(new OutboundNormalArc(turnYellow,isYellow,weights));
+		net.addArc(new InboundNormalArc(isYellow,turnRed,weights));
+		net.addArc(new OutboundNormalArc(turnRed,isRed,weights));
+		net.addArc(new InboundNormalArc(isRed,turnGreen,weights));
+		net.addArc(new InboundNormalArc(isYellow,turnGreen,weights));
+		net.addArc(new OutboundNormalArc(turnGreen,isGreen,weights));
+		net.addArc(new OutboundNormalArc(turnPhaseWest,isYellow,weights));
+		net.addArc(new OutboundNormalArc(turnRed,isPhaseSouth,weights));
+		net.addArc(new InboundInhibitorArc(isRed,turnRed));
 
-		return petriNet;
+		return net;
 	}
 
 }

@@ -10,8 +10,6 @@ import uk.ac.imperial.pipe.models.petrinet.TransitionVisitor;
 import uk.ac.imperial.pipe.visitor.TransitionCloner;
 import uk.ac.imperial.pipe.visitor.component.PetriNetComponentVisitor;
 
-import traffic_sim.TrafficLightTransitionCall;
-
 /**
  * An external transition wrapping an attached external action which should be called
  * when the (connected) transition is fired.
@@ -28,10 +26,12 @@ public class DiscreteExternalActionCallTransition extends DiscreteExternalTransi
 	// A copy constructor is required.
 	public DiscreteExternalActionCallTransition(DiscreteExternalActionCallTransition transition) {
 		super(transition);
+		this.timed = transition.isTimed();
+		this.setDelay(transition.getDelay());
 		this.externalAction = transition.externalAction;
 	}
 
-	public DiscreteExternalActionCallTransition(String id, String name, TrafficLightTransitionCall extAct) {
+	public DiscreteExternalActionCallTransition(String id, String name, ExternalActionInterface extAct) {
 		// Here the real transition is build as a StartActionExternalTransition.
 		super(id, name, "pipe_project.StartActionExternalTransition");
 		this.externalAction = extAct;

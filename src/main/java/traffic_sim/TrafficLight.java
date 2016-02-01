@@ -13,18 +13,17 @@ import java.util.ArrayList;
 public class TrafficLight implements VehicleProducerInterface, VehicleConsumerInterface,Drawable   {
 
     protected Lane lane_ends, lane_starts;
-	// The current state of the traffic light - right now only green (true) or
-	// red (false).
-    private boolean green = false;
 
     // A list of all traffic lights - used for visualization.
     protected static ArrayList<TrafficLight> trafficLights = new ArrayList<>();
 
 	// Visualization points.
 	private Point start_point, end_point, graphic_pos;
+	private Color color;
 
-    public TrafficLight() {
+	public TrafficLight() {
     	trafficLights.add(this);
+		color=Color.RED;
     }
 
     /*
@@ -53,7 +52,7 @@ public class TrafficLight implements VehicleProducerInterface, VehicleConsumerIn
 	 */
 	@Override
 	public boolean tryToConsumeVehicle(Vehicle veh) {
-		if ((green) & (this.lane_starts.spaceForNewCarAvailable()) ) {
+		if (color.equals(Color.GREEN) & (this.lane_starts.spaceForNewCarAvailable()) ) {
     		veh.switchToLane(this.lane_starts);
 	    	return true;
 	    } else {
@@ -105,12 +104,8 @@ public class TrafficLight implements VehicleProducerInterface, VehicleConsumerIn
 		end_point = new Point(x, y);
 	}
 
-	public void setTrafficLightGreen(boolean new_state) {
-		this.green = new_state;
-	}
-
-	public boolean isTrafficLightGreen() {
-		return this.green;
+	public void setTrafficLightGreen(Color c) {
+		this.color = c;
 	}
 
 	/*
@@ -127,11 +122,7 @@ public class TrafficLight implements VehicleProducerInterface, VehicleConsumerIn
 
 	@Override
 	public void redraw(Graphics2D g2d) {
-		if (this.isTrafficLightGreen()) {
-			g2d.setPaint(Color.green);
-		} else {
-			g2d.setPaint(Color.red);
-		}
+		g2d.setPaint(color);
 		Point tl_pos = this.graphic_pos;
 		g2d.fillOval( tl_pos.x, tl_pos.y, 15, 15);
 	}
