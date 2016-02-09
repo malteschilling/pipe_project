@@ -13,6 +13,7 @@ public abstract class TemporalTrafficObject {
     
     // Collection of all simulation objects that require updates.
     protected static ArrayList<TemporalTrafficObject> updateList = new ArrayList<>();
+    private static double current_time = 0.;
     
     public TemporalTrafficObject() {
         updateList.add(this);
@@ -34,6 +35,14 @@ public abstract class TemporalTrafficObject {
 		for (TemporalTrafficObject updObj : updateList) {
 			updObj.updateStep(duration);
 		}
+		current_time = current_time + duration;
+	}
+	
+	/*
+	 * Get the current time of the traffic simulation.
+	 */
+	public static double getCurrentTime() {
+		return current_time;
 	}
     
 }

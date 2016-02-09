@@ -50,16 +50,26 @@ import java.util.SimpleTimeZone;
  */
 public class MainPN {
 
-	private static final int TIME_GREEN = 2000;
+	private static final int TIME_GREEN = 5000;
 	private static final int TIME_YELLOW = 500;
 	private static final int TIME_START_PHASE = 1000;
 	private static final int TIME_YELLOW_RED = 500;
-	public static RealTimePetriNetRunner runner;
+	public static FFWTimePetriNetRunner runner;
 
+	// Call with: mvn exec:java -Dexec.args="false"
     public static void main(String[] args) {
      	// 1. Construct main window showing traffic situation (and exit button)
 		final TrafficController controller = new TrafficController();
-
+		boolean realTimeArg = true;
+		if (args.length > 0) {
+			try {
+    			realTimeArg = Boolean.parseBoolean(args[0]);
+		    } catch (NumberFormatException e) {
+    		    System.err.println("Argument " + args[0] + " must be a boolean - indicating if the simulation should be run in real time (or not).");
+    		}
+    	}
+		controller.setRealTimeControlFlag( realTimeArg );
+		
     	// 2. Construct traffic simulation scene
 
         try {
@@ -80,7 +90,7 @@ public class MainPN {
    			}
 
 	    	// Start running of the PN
-    		runner = new RealTimePetriNetRunner( currentPN );
+    		runner = new FFWTimePetriNetRunner( currentPN );
 			FiringGenericActionListener firedTrans = new FiringGenericActionListener();
 			runner.addPropertyChangeListener(firedTrans);
 
@@ -110,7 +120,7 @@ public class MainPN {
 
     	// Lane form west to east and south
     	VehicleProducer westStart = new VehicleProducer(100, 200);
-    	VehicleConsumer eastDestination1 = new VehicleConsumer(800, 200);
+    	VehicleConsumerEvaluation eastDestination1 = new VehicleConsumerEvaluation(800, 200, "EastEndTL");
     	VehicleConsumer southDestination = new VehicleConsumer(400, 500);
     	LaneExtension westLaneSplit = new LaneExtension(200, 200);
     	LaneExtension westLaneExtension = new LaneExtension(240, 240);
@@ -140,7 +150,7 @@ public class MainPN {
 
     	// Lanes from south to west and east
     	VehicleProducer southStart = new VehicleProducer(460, 500);
-    	VehicleConsumer westDestination2 = new VehicleConsumer(100, 140);
+    	VehicleConsumerEvaluation westDestination2 = new VehicleConsumerEvaluation(100, 140, "WestEndTL");
     	VehicleConsumer eastDestination2 = new VehicleConsumer(800, 240);
 
     	LaneExtension southToWestTurn = new LaneExtension(460, 140);

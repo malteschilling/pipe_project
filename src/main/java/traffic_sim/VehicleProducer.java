@@ -1,6 +1,10 @@
 package traffic_sim;
 
 import java.awt.*;
+import java.util.Random;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * VehicleProducer
@@ -14,9 +18,31 @@ public class VehicleProducer extends TemporalTrafficObject implements VehiclePro
 
 	// the connected lane
     protected Lane lane_starts;
-    private double time = 0.;
     // Point for graphic visualization
     private Point start_point;
+
+	public enum TrafficSituation {
+		LOW(40), MEDIUM(25), RUSHHOUR(15);
+		private int vehicleProductionRate;
+
+		private static final List<TrafficSituation> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
+ 
+		private TrafficSituation(int value) {
+			this.vehicleProductionRate = value;
+		}
+		
+		private static final int SIZE = VALUES.size();
+		private static final Random RANDOM = new Random();
+
+		public static TrafficSituation randomTrafficSituation()  {
+			return VALUES.get(RANDOM.nextInt(SIZE));
+  		}
+	}
+	
+	private TrafficSituation currentTrafficSituation = TrafficSituation.MEDIUM;
+    private double time = 0.;
+    private Random randomGenerator = new Random();
+    private double nextTrafficSituationChangeTime = (double) (randomGenerator.nextInt(20));
 
     public VehicleProducer() {
     	super();
@@ -38,12 +64,26 @@ public class VehicleProducer extends TemporalTrafficObject implements VehiclePro
      */
     @Override
 	public void updateStep(double duration) {
-		if (time % 5 == 0.) {
+		if (time > nextTrafficSituationChangeTime) {
+			currentTrafficSituation = TrafficSituation.randomTrafficSituation();
+			//System.out.println("Switched Traffic Situation: " + currentTrafficSituation);
+			nextTrafficSituationChangeTime = time + (double) (randomGenerator.nextInt(20));
+		}
+		if (randomGenerator.nextInt(currentTrafficSituation.vehicleProductionRate) == 0) {
 			if (this.lane_starts.spaceForNewCarAvailable() ) {
 				new Vehicle( ("Car_" + time), this.lane_starts );
 			}
 		}
 		time += duration;
+	}
+
+	/*
+	 * Get the currentTrafficSituation for this Producer:
+	 * the current traffic situation describes how many cars will be set on the outgoing
+	 * lane.
+	 */
+	public TrafficSituation getCurrentTrafficSituation() {
+		return currentTrafficSituation;
 	}
 
 	@Override

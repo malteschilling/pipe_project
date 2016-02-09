@@ -25,6 +25,8 @@ public class Vehicle {
 	// In the simulations, the lane calls the update of positions for the vehicles in
 	// that lane.
 	private Lane current_lane;
+	// Time when the car was produced.
+	private double startTime;
 	/**
 	 * Destination the car would like to reach. Should be as close as possible to the real destination.
 	 */
@@ -73,6 +75,8 @@ public class Vehicle {
 		this.ACCEL = 7;
 		this.MAX_VELOCITY = 40;
 		destinations = new ArrayList<>();
+		
+		startTime = TemporalTrafficObject.getCurrentTime();
 	}
 
 	/*
@@ -305,7 +309,10 @@ public class Vehicle {
 			setPositionInLane(new_pos);
 			current_lane.free_until = new_pos - Lane.min_car_distance;
 		}
-
 		//TODO Update global position and direction
+	}
+	
+	public double getTimeOfProduction() {
+		return startTime;
 	}
 }

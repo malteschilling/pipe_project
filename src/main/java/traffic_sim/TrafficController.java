@@ -1,9 +1,11 @@
 package traffic_sim;
 
-import uk.ac.imperial.pipe.runner.RealTimePetriNetRunner;
+//import uk.ac.imperial.pipe.runner.RealTimePetriNetRunner;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import pipe_project.FFWTimePetriNetRunner;
 
 import javax.swing.JPanel;
 
@@ -16,6 +18,11 @@ public class TrafficController {
 
     private View view;
     private ActionListener actionListener;
+    
+    private static final double UPDATE_STEP = 0.1;
+    // The simulation can be run in realtime - or just in evaluation mode
+	// = there will be no sleep cycles in between (and no view updates).
+    private static boolean REALTIME_CONTROL = true;
 
     public TrafficController(){
         this.view = new View();
@@ -27,18 +34,30 @@ public class TrafficController {
         view.getButton().addActionListener(actionListener);
     }
 
-    public void control(RealTimePetriNetRunner runner){
+    public void control(FFWTimePetriNetRunner runner){
         while (true) {
             // Stepping the Petri Net every second (this should be tuned to a lower value
             // when your system is running).
             // and for the rest of the time the thread sleeps.
-            runner.stepPetriNetSynchronized(1000);
+            if (REALTIME_CONTROL) {
+	            runner.stepPetriNetSynchronized( (int) (UPDATE_STEP*1000) );
+	        } else {
+	        	runner.stepFastForwardPetriNet( (int) (UPDATE_STEP*1000) );
+	        }
             // And calling an update on the traffic simulation.
-            TemporalTrafficObject.updateAll( 1. );
+            TemporalTrafficObject.updateAll( UPDATE_STEP );
             view.getTrafficView().repaint();
         }
     }
-
+    
+    public boolean getRealTimeControlFlag() {
+    	return REALTIME_CONTROL;
+    }
+    
+    public void setRealTimeControlFlag( boolean realTime ) {
+    	REALTIME_CONTROL = realTime; 
+	}
+	
     public View getView() {
         return view;
     }
