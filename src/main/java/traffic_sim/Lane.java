@@ -41,7 +41,11 @@ public class Lane extends TemporalTrafficObject implements Drawable {
         this.start_connection.setLaneStarting(this);
         this.end_connection = cons;
         this.end_connection.setLaneEnding(this);
-        length = 100;
+        Point start = prod.getStartPoint();
+        Point end = cons.getEndPoint();
+        Point diff = new Point(end.x - start.x, end.y - start.y);
+        length = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+        System.out.println(name + ": " + start + ", " + end + ", " + diff + ", " + length);
         free_until = length;
     }
 
@@ -205,8 +209,12 @@ public class Lane extends TemporalTrafficObject implements Drawable {
         }
         return inFront;
     }
-    
+
     public ConcurrentLinkedQueue<Vehicle> getVehiclesOnLane() {
     	return vehiclesOnLane;
+    }
+
+    public String getName() {
+        return name;
     }
 }

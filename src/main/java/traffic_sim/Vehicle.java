@@ -51,10 +51,6 @@ public class Vehicle {
 	 * Direction the car is driving in in degrees [-180,180]
 	 */
 	private double current_direction;
-	/**
-	 * Preceding vehicle on same lane.
-	 */
-	private Vehicle preceding_vehicle = null;
 
 	/**
 	 * Random number generator.
@@ -72,10 +68,10 @@ public class Vehicle {
 		lane.addVehicleToLane(this);
 		this.position = 0;
 		this.current_velocity = 40.;
-		this.ACCEL = 7;
+		this.ACCEL = 10;
 		this.MAX_VELOCITY = 40;
 		destinations = new ArrayList<>();
-		
+
 		startTime = TemporalTrafficObject.getCurrentTime();
 	}
 
@@ -166,7 +162,7 @@ public class Vehicle {
 	 */
 	public void accelerate(double timedelta) {
 		Vehicle in_front = current_lane.getVehicleInFront(this);
-		if ((in_front == null && current_lane.getDistanceToEnd(position) > 0) ||
+		if (in_front == null ||
 			(in_front != null && getFrontVehicleDistance(in_front) >= 2 * Lane.min_car_distance)) {
 			current_velocity += timedelta * ACCEL;
 			current_velocity = current_velocity > MAX_VELOCITY ? MAX_VELOCITY : current_velocity;
@@ -269,7 +265,7 @@ public class Vehicle {
 		if (in_front != null) {
 			return Math.abs(in_front.getPositionInLane() - this.getPositionInLane());
 		} else {
-			return this.current_lane.getDistanceToEnd(this.position);
+			return 0;
 		}
 	}
 
@@ -288,7 +284,6 @@ public class Vehicle {
 			}
 		}
 
-		//TODO Other actions like accelerating, decelerating, etc.
 		//Try to accelerate all the time
 		accelerate(elapsed_secs);
 		Vehicle in_front = current_lane.getVehicleInFront(this);
@@ -309,9 +304,8 @@ public class Vehicle {
 			setPositionInLane(new_pos);
 			current_lane.free_until = new_pos - Lane.min_car_distance;
 		}
-		//TODO Update global position and direction
 	}
-	
+
 	public double getTimeOfProduction() {
 		return startTime;
 	}
