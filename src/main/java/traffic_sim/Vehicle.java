@@ -56,6 +56,7 @@ public class Vehicle {
 	 * Random number generator.
 	 */
 	private static Random randomOracle = new Random();
+	private double remaining = 0.0;
 
 	/*
 	 * Constructor - a vehicle always requires a lane.
@@ -105,7 +106,7 @@ public class Vehicle {
 		//this.position = velocity - ( current_lane.getDistanceToEnd( position ) );
 		current_lane.removeVehicleFromLane(this);
 		newLane.addVehicleToLane(this);
-		this.position = 0;
+		this.position = remaining;
 	}
 
 	/*
@@ -295,6 +296,7 @@ public class Vehicle {
 		}
 		double new_pos = position + driven_delta;
 		if (new_pos >= current_lane.getLength()) {
+			remaining = new_pos - current_lane.getLength();
 			if (!current_lane.end_connection.tryToConsumeVehicle(this)) {
 				stop();
 				new_pos = current_lane.getLength();

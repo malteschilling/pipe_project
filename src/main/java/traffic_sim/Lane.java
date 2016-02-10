@@ -45,7 +45,6 @@ public class Lane extends TemporalTrafficObject implements Drawable {
         Point end = cons.getEndPoint();
         Point diff = new Point(end.x - start.x, end.y - start.y);
         length = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
-        System.out.println(name + ": " + start + ", " + end + ", " + diff + ", " + length);
         free_until = length;
     }
 
