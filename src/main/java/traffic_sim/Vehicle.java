@@ -102,20 +102,26 @@ public class Vehicle {
 	/*
 	 * Remove a vehicle from one lane and put it onto another.
 	 */
-	public void switchToLane(Lane newLane) {
+	public boolean switchToLane(Lane newLane) {
 		//this.position = velocity - ( current_lane.getDistanceToEnd( position ) );
-		current_lane.removeVehicleFromLane(this);
-		newLane.addVehicleToLane(this);
-		this.position = remaining;
+		if (newLane.spaceForNewCarAvailable()) {
+			current_lane.removeVehicleFromLane(this);
+			newLane.addVehicleToLane(this);
+			this.position = remaining;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/*
 	 * Remove a vehicle from one lane and put it onto one of the given lanes.
 	 *
 	 */
-	public void switchToLane(List<Lane> lanes) {
+	public boolean switchToLane(List<Lane> lanes) {
 		Lane choice = chooseNextLane(lanes);
-		this.switchToLane(choice);
+		return this.switchToLane(choice);
 	}
 
 	/*

@@ -50,12 +50,12 @@ public class LaneExtension implements VehicleConsumerInterface,
 	public boolean tryToConsumeVehicle(Vehicle veh) {
 		int numberOfOutgoingLanes = outgoingLanes.size();
 		if (numberOfOutgoingLanes > 0) {
-			veh.switchToLane(outgoingLanes);
+			return veh.switchToLane(outgoingLanes);
 		} else {
 			veh.removeVehicleFromLane();
+			return true;
 		}
 //		veh.removeVehicleFromLane();
-		return true;
 	}
 
 	@Override
